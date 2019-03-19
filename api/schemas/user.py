@@ -11,3 +11,9 @@ register_schema = Schema({
     Required('password1'): str,
     Required('password2'): str,
 })
+
+
+sms_schema = Schema({
+    Required('phone'): All(str, ),
+})
+

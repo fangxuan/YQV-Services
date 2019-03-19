@@ -9,7 +9,7 @@ MYSQL_PORT = '3306'
 MYSQL_DATABASE = 'YQV_APP'
 
 REDIS_HOST = '127.0.0.1'
-REDIS_POST = '1234'
+REDIS_POST = '6379'
 
 
 class Config(object):

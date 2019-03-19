@@ -1,9 +1,10 @@
+import random
+
 from flask import Blueprint, request
 
-from api import redis_store
-from api.extensions import gen_md5
+from api.extensions import gen_md5, redis_store, db
 from api.models.user import User
-from api.schemas.user import login_schema, register_schema
+from api.schemas.user import login_schema, register_schema, sms_schema
 from api.views.base import common_response, SysStatus
 
 blue_print = Blueprint('user', __name__, url_prefix='/api/users')
@@ -36,14 +37,31 @@ def user_reg():
         return common_response(SysStatus.FAIL, None, '密码不一致')
 
     real_sms_code = redis_store.get('{}-sms'.format(phone))
+    print(real_sms_code)
     if sms_code != real_sms_code:
         return common_response(SysStatus.FAIL, None, '短信校验码错误')
 
     password = gen_md5(password1)
-    print(password)
 
     user = User.query.filter(User.phone == phone).first()
     if user:
-        return common_response(SysStatus.FAIL, user, '该手机号已注册')
+        return common_response(SysStatus.FAIL, user.phone, '该手机号已注册')
     else:
+        user = User(phone=phone, password=password)
+        db.session.add(user)
+        db.session.commit()
+        redis_store.delete('{}-sms'.format(phone))
         return common_response(SysStatus.FAIL, None, '注册成功')
+
+
+@blue_print.route('/sms', methods=['POST'])
+def sms():
+    params = sms_schema(request.json or '')
+    phone = params.get('phone')
+
+    sms_code = random.randint(0, 999999)
+    sms_code = "%06d" % sms_code
+
+    redis_store.set('{}-sms'.format(phone), sms_code, 60 * 5)
+    print(sms_code)
+    return common_response(SysStatus.FAIL, None, '发送成功')

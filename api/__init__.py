@@ -1,8 +1,7 @@
 from flask import Flask
-from redis import StrictRedis
 # from flask_session import Session
 from api.extensions import db
-from api.settings import DevConfig, REDIS_HOST, REDIS_POST
+from api.settings import DevConfig
 from api.views import user
 
 
@@ -26,4 +25,3 @@ def create_app(env_config):
     return app
 
 
-redis_store = StrictRedis(host=REDIS_HOST, port=REDIS_POST, decode_responses=True)
