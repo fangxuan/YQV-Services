@@ -47,3 +47,4 @@ def user_reg():
         return common_response(SysStatus.FAIL, user, '该手机号已注册')
     else:
         return common_response(SysStatus.FAIL, None, '注册成功')
+    #
