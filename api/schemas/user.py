@@ -17,3 +17,8 @@ sms_schema = Schema({
     Required('phone'): All(str, ),
 })
 
+
+user_info_schema = Schema({
+    Required('id'): int
+})
+

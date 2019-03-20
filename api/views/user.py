@@ -1,8 +1,8 @@
 import random
 
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 
-from api.extensions import gen_md5, redis_store, db
+from api.extensions import gen_md5, redis_store, db, login_user_data
 from api.models.user import User
 from api.schemas.user import login_schema, register_schema, sms_schema
 from api.views.base import common_response, SysStatus
@@ -16,11 +16,11 @@ def user_login():
     phone = params.get('phone')
     password = params.get('password')
     password = gen_md5(password)
-    print(password)
 
     user = User.query.filter(User.phone == phone, User.password == password).first()
     if user:
-        return common_response(SysStatus.SUCCESS, user, '登录成功')
+        session['user_id'] = user.id
+        return common_response(SysStatus.SUCCESS, user.name, '登录成功')
     else:
         return common_response(SysStatus.FAIL, None, '手号或密码错误')
 
@@ -64,4 +64,16 @@ def sms():
 
     redis_store.set('{}-sms'.format(phone), sms_code, 60 * 5)
     print(sms_code)
+    return common_response(SysStatus.FAIL, None, '发送成功')
+
+
+@blue_print.route('/info', methods=['GET'])
+@login_user_data
+def user_info_get(user):
+    # params = sms_schema(request.json or '')
+    # user_id = params.get('id')
+
+    user_id = user.id
+    user = User.query.filter(User.id == user_id).first()
+    print(user)
     return common_response(SysStatus.FAIL, None, '发送成功')

@@ -1,5 +1,7 @@
 import os
 
+from redis import StrictRedis
+
 os_env = os.environ
 
 MYSQL_USER = 'root'
@@ -41,3 +43,18 @@ class DevConfig(Config):
                                                                                                      database=MYSQL_DATABASE)}
     ASSETS_DEBUG = True
     CACHE_TYPE = 'redis'
+
+    # Redis存储位置的配置
+    # 设置加密字符串
+    SECRET_KEY = "ygIUfgiGUYiuyG87GKYG9678GT98778hyfjdkgnhert345hinksdag"
+    # 调整session存储位置（存储到redis）
+    # 指明session存储到哪种类型的数据库
+    SESSION_TYPE = "redis"
+    # 上面指明的数据库的实例对象
+    SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_POST)
+    # session数据需要加密
+    SESSION_USE_SIGNER = True
+    # 不设置永久存储
+    SESSION_PERMANENT = False
+    # 设置存储的有效时间（默认timedelta(days=30))
+    PERMANENT_SESSION_LIFETIME = 86400 * 2
