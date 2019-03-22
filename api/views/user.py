@@ -64,7 +64,7 @@ def sms():
 
     redis_store.set('{}-sms'.format(phone), sms_code, 60 * 5)
     print(sms_code)
-    return common_response(SysStatus.FAIL, None, '发送成功')
+    return common_response(SysStatus.SUCCESS, None, '发送成功')
 
 
 @blue_print.route('/info', methods=['GET'])
@@ -74,7 +74,15 @@ def user_info_get(user):
     # user_id = params.get('id')
 
     user_id = user.id
-    user = User.query.filter(User.id == user_id).first()
-    print(user)
-    return common_response(SysStatus.FAIL, None, '发送成功')
+    user = User.query.filter(User.id == user_id).with_entities(User.id,
+                                                             User.avatar,
+                                                             User.name,
+                                                             User.phone,
+                                                             User.birthday,
+                                                             User.gender,
+                                                             User.email,
+                                                                        ).first()
+
+    data = {"user_id":user.id}
+    return common_response(SysStatus.SUCCESS, user, None)
 
