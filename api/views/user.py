@@ -70,19 +70,32 @@ def sms():
 @blue_print.route('/info', methods=['GET'])
 @login_user_data
 def user_info_get(user):
-    # params = sms_schema(request.json or '')
-    # user_id = params.get('id')
-
     user_id = user.id
     user = User.query.filter(User.id == user_id).with_entities(User.id,
-                                                             User.avatar,
-                                                             User.name,
-                                                             User.phone,
-                                                             User.birthday,
-                                                             User.gender,
-                                                             User.email,
-                                                                        ).first()
+                                                               User.avatar,
+                                                               User.name,
+                                                               User.phone,
+                                                               User.birthday,
+                                                               User.gender,
+                                                               User.email,
+                                                               ).first()
 
-    data = {"user_id":user.id}
+    return common_response(SysStatus.SUCCESS, user, None)
+
+
+@blue_print.route('/info', methods=['PUT'])
+@login_user_data
+def user_info_put(user):
+    info = request.json
+    user_id = user.id
+    user = User.query.filter(User.id == user_id).with_entities(User.id,
+                                                               User.avatar,
+                                                               User.name,
+                                                               User.phone,
+                                                               User.birthday,
+                                                               User.gender,
+                                                               User.email,
+                                                               ).first()
+
     return common_response(SysStatus.SUCCESS, user, None)
 
