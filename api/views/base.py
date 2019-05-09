@@ -12,6 +12,13 @@ class SysStatus(Enum):
     PARAMETER_CHECK_ERROR = '参数校验失败'
 
 
+class StatusCode(Enum):
+    SUCCESS = 2000
+    FAIL = 2001
+    NOT_FOUND = 4004
+    PARAMETER_CHECK_ERROR = 3001
+
+
 class DatatimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
@@ -26,6 +33,16 @@ class DatatimeEncoder(json.JSONEncoder):
 def common_response(sys_status, data, message):
     if not message:
         message = sys_status.value
-    res = json.dumps({'sys_status': sys_status.name, 'data': data, 'message': message}, ensure_ascii=False, cls=DatatimeEncoder)
+    res = json.dumps({'sys_status': sys_status.name, 'data': data, 'message': message}, ensure_ascii=False,
+                     cls=DatatimeEncoder)
+
+    return Response(res, mimetype='application/json')
+
+
+def robot_response(sys_status, data, message):
+    if not message:
+        message = sys_status.name
+    res = json.dumps({'code': StatusCode.SUCCESS, 'data': data, 'message': message}, ensure_ascii=False,
+                     cls=DatatimeEncoder)
 
     return Response(res, mimetype='application/json')

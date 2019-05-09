@@ -1,9 +1,7 @@
-from flask_sqlalchemy import Model
 from sqlalchemy import Column
 
 from api import db
-from api.models.base import BaseModel
-
+from api.models.base import BaseModel, Model
 
 
 class Goods(BaseModel, Model):

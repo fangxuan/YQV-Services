@@ -1,4 +1,4 @@
-from voluptuous import Schema, Required, In, All, Optional, Length, Email
+from voluptuous import Schema, Required, In, All, Optional, Length, Email, Url, Date
 
 login_schema = Schema({
     Required('phone'): All(str, ),
