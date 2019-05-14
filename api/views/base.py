@@ -38,13 +38,3 @@ def common_response(sys_status, data, message):
 
     return Response(res, mimetype='application/json')
 
-
-def robot_response(sys_status, data, message):
-    if not message:
-        message = sys_status.name
-    if not data:
-        data = {"state": True}
-    res = json.dumps({'code': StatusCode.SUCCESS, 'data': data, 'message': message}, ensure_ascii=False,
-                     cls=DatatimeEncoder)
-
-    return Response(res, mimetype='application/json')
