@@ -4,7 +4,7 @@ from flask import Blueprint, request, session
 
 from api.extensions import gen_md5, redis_store, db, login_user_data
 from api.models.user import User
-from api.schemas.user import login_schema, register_schema, sms_schema
+from api.schemas.user import login_schema, register_schema, sms_schema, user_info_schema
 from api.views.base import common_response, SysStatus
 
 blue_print = Blueprint('user', __name__, url_prefix='/api/users')
@@ -15,14 +15,14 @@ def user_login():
     params = login_schema(request.json or '')
     phone = params.get('phone')
     password = params.get('password')
-    password = gen_md5(password)
+    # password = gen_md5(password) #
 
     user = User.query.filter(User.phone == phone, User.password == password).first()
     if user:
         session['user_id'] = user.id
         return common_response(SysStatus.SUCCESS, user.name, '登录成功')
     else:
-        return common_response(SysStatus.FAIL, None, '手号或密码错误')
+        return common_response(SysStatus.FAIL, None, '账号号或密码错误')
 
 
 @blue_print.route('/register', methods=['POST'])
@@ -37,7 +37,7 @@ def user_reg():
         return common_response(SysStatus.FAIL, None, '密码不一致')
 
     real_sms_code = redis_store.get('{}-sms'.format(phone))
-    print(real_sms_code)
+    print("sms-code for {}: {}".format(phone, real_sms_code))
     if sms_code != real_sms_code:
         return common_response(SysStatus.FAIL, None, '短信校验码错误')
 
@@ -52,6 +52,31 @@ def user_reg():
         db.session.commit()
         redis_store.delete('{}-sms'.format(phone))
         return common_response(SysStatus.FAIL, None, '注册成功')
+
+
+@blue_print.route('/reset_password', methods=['POST'])
+def lost_pass():
+    params = register_schema(request.json or '')
+    phone = params.get('phone')
+    password_old = params.get('password_old')
+    password = params.get('password')
+    sms_code = params.get('sms_code')
+
+    real_sms_code = redis_store.get('{}-sms'.format(phone))
+    print("sms-code for {}: {}".format(phone, real_sms_code))
+    if sms_code != real_sms_code:
+        return common_response(SysStatus.FAIL, None, '短信校验码错误')
+
+    # password = gen_md5(password1) TODO: 正式环境不要明文保存密码
+    # password_old = gen_md5(password_old) TODO: 正式环境不要明文保存密码
+
+    user = User.query.filter(User.phone == phone, User.password == password_old).first()
+    if user:
+        user.password = password
+        user.save()
+        redis_store.delete('{}-sms'.format(phone))
+    else:
+        return common_response(SysStatus.FAIL, None, '原密码错误')
 
 
 @blue_print.route('/sms', methods=['POST'])
@@ -86,16 +111,18 @@ def user_info_get(user):
 @blue_print.route('/info', methods=['PUT'])
 @login_user_data
 def user_info_put(user):
-    info = request.json
-    user_id = user.id
-    user = User.query.filter(User.id == user_id).with_entities(User.id,
-                                                               User.avatar,
-                                                               User.name,
-                                                               User.phone,
-                                                               User.birthday,
-                                                               User.gender,
-                                                               User.email,
-                                                               ).first()
-
+    params = request.json or ''
+    params = user_info_schema(params)
+    user.update(params)
+    user.save()
     return common_response(SysStatus.SUCCESS, user, None)
 
+
+@blue_print.route('/info', methods=['PUT'])
+@login_user_data
+def user_info_put(user):
+    params = request.json or ''
+    params = user_info_schema(params)
+    user.update(params)
+    user.save()
+    return common_response(SysStatus.SUCCESS, user, None)

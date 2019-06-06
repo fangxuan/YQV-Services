@@ -48,3 +48,8 @@ class Seed(BaseModel, Model):
     time_cost = Column(db.String(40), comment='预计所需时间')
     area_need = Column(db.Integer(), comment='占地面积')
     area_unit = Column(db.String(40), comment='占地面积单位')
+
+class Storage(BaseModel, Model):
+    __tablename__ = 'storage'
+    user_id = Column(db.ForeignKey('user.id'), comment='仓库')
+    item_id =Column(db.ForeignKey('seed.id'),  comment='物品ou o')

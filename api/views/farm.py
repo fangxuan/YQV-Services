@@ -22,6 +22,10 @@ def query_all_plants():
 @blue_print.route('/user', methods=['GET'])
 # @login_required(user_id)
 def query_user_plants():
+    """
+    get water used and left
+    :return:
+    """
     params = request.args
     page_index, page_size = paginate_schema(params)
     user_plants = UserPlant.query.join(Plant).filter(UserPlant.user_id == 1).with_entities(*user_plant_basic_ser).order_by(
@@ -29,3 +33,18 @@ def query_user_plants():
                                per_page=page_size)
     data = {'pages': user_plants.pages, 'items': user_plants.items}
     return common_response(SysStatus.SUCCESS, data, None)
+
+# @blue_print.route('nurse', methods=['POST'])
+# def nurse_plants():
+#     """
+#     get water/fertilizer user and total
+#     :return:
+#     """
+#
+#     params = request.args
+#     id = params.get('id')
+#     if id :
+#         Ferti.query.fillter_by(Ferti.user_id = id)
+
+
+
