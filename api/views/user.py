@@ -5,9 +5,9 @@ from flask import Blueprint, request, session
 from api.extensions import gen_md5, redis_store, db, login_user_data
 from api.models.user import User
 from api.schemas.user import login_schema, register_schema, sms_schema, user_info_schema
-from api.views.base import common_response, SysStatus
+from api.views.base import common_response, SysStatus, render_data
 
-blue_print = Blueprint('user', __name__, url_prefix='/api/users')
+blue_print = Blueprint('user', __name__, url_prefix='/api/v0/user')
 
 
 @blue_print.route('/login', methods=['POST'])
@@ -15,7 +15,7 @@ def user_login():
     params = login_schema(request.json or '')
     phone = params.get('phone')
     password = params.get('password')
-    # password = gen_md5(password) #
+    # password = gen_md5(password) # TODO：正式环境加密密码
 
     user = User.query.filter(User.phone == phone, User.password == password).first()
     if user:
@@ -118,11 +118,7 @@ def user_info_put(user):
     return common_response(SysStatus.SUCCESS, user, None)
 
 
-@blue_print.route('/info', methods=['PUT'])
+@blue_print.route('/my_farm', methods=['GET'])
 @login_user_data
-def user_info_put(user):
-    params = request.json or ''
-    params = user_info_schema(params)
-    user.update(params)
-    user.save()
-    return common_response(SysStatus.SUCCESS, user, None)
+def my_farm(user):
+    return render_data(user, username='509', body='this id a webpage body')
