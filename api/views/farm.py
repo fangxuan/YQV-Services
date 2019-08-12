@@ -3,6 +3,7 @@ from flask import Blueprint, request
 from api import db
 from api.models.farm import Plant, UserPlant
 from api.schemas.base import paginate_schema
+from api.schemas.farm import buy_plant_schema
 from api.serializer.farm import plant_basic_ser, user_plant_basic_ser
 from api.views.base import common_response, SysStatus
 
@@ -43,11 +44,12 @@ def query_all_plants():
 def query_user_plants():
     """
        @api {GET} /api/v0/plants/user 获取用户植物信息
-       @apiName get_wechat_payinfo
-       @apiGroup wechatpay
+       @apiName query_user_plants
+       @apiGroup farm
        @apiSuccess {number} sys_status 状态码
        @apiSuccess {string} message  返回的信息
        @apiSuccess {dict} data 返回的数据
+       @apiSuccess {int} id 编号
        @apiSuccess {int} plant_id 植物ID
        @apiSuccess {bool} active_flag 是否激活
        @apiSuccess {int} water 水
@@ -68,23 +70,42 @@ def query_user_plants():
     """
     params = request.args
     page_index, page_size = paginate_schema(params)
-    user_plants = UserPlant.query.join(Plant).filter(UserPlant.user_id == 1).with_entities(*user_plant_basic_ser).order_by(
+    user_plants = UserPlant.query.join(Plant).filter(UserPlant.user_id == 1).with_entities(
+        *user_plant_basic_ser).order_by(
         UserPlant.id).paginate(page=page_index,
                                per_page=page_size)
     data = {'pages': user_plants.pages, 'items': user_plants.items}
     return common_response(SysStatus.SUCCESS, data, None)
 
-# @blue_print.route('nurse', methods=['POST'])
-# def nurse_plants():
-#     """
-#     get water/fertilizer user and total
-#     :return:
-#     """
-#
-#     params = request.args
-#     id = params.get('id')
-#     if id :
-#         Ferti.query.fillter_by(Ferti.user_id = id)
 
+@blue_print.route('/buy_plant', methods=['POST'])
+# @login_required(user_id)
+def buy_plant():
+    """
+       @api {GET} /api/v0/plants/buy_plant 获取用户植物信息
+       @apiName buy_plant
+       @apiGroup farm
+       @apiParam {number} plant_id 植物id
+       @apiParam {number} quantity 数量
+       @apiSuccess {number} sys_status 状态码
+       @apiSuccess {string} message  返回的信息
+       @apiSuccessExample Success-Response:
+      {"sys_status": "SUCCESS", "data": {"pages": 1, "items": [{"plant_id": 1, "active_flag": true, "water": 80, "fertilizer": 54, "pesticide": 0, "price": "1.02", "harvest_at": "2019-05-31", "status": {"HEALTHY": "健康"}, "image": "http://image.antns.com/uploads/20171220/12/1513742641-BghOtrbPHu.jpg", "created_at": "2019-05-14 10:27:51", "name": "白菜", "category": "蔬菜"}, {"plant_id": 2, "active_flag": true, "water": 50, "fertilizer": 4, "pesticide": 0, "price": "2.00", "harvest_at": "2019-06-14", "status": {"HEALTHY": "健康"}, "image": null, "created_at": "2019-05-14 15:50:44", "name": "萝卜", "category": "蔬菜"}]}, "message": "成功"}
+       @apiErrorExample Error-Response:
+        {"data": null,"message": "失败","sys_status": 1}
 
+    """
+    params = request.args
+    params = buy_plant_schema(params)
+    plant_id = params.get('plant_id')
+    quantity = params.get('quantity')
 
+    plant_exist = db.session.query(Plant.query.filter(Plant.id == plant_id).exists()).scalar()
+    if not plant_exist:
+        return common_response(SysStatus.FAIL, None, "植物不存在")
+    total_price = Plant.query.filter(Plant.id == plant_id).with_entities(Plant.needs)
+
+    user_coin = UserPlant
+    if total_price.price * quantity < 1000:
+        return common_response(SysStatus.FAIL, None, "金币不足")
+    return common_response(SysStatus.SUCCESS, None, "购买成功")

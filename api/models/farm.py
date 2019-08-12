@@ -49,7 +49,14 @@ class Seed(BaseModel, Model):
     area_need = Column(db.Integer(), comment='占地面积')
     area_unit = Column(db.String(40), comment='占地面积单位')
 
+
 class Storage(BaseModel, Model):
     __tablename__ = 'storage'
-    user_id = Column(db.ForeignKey('user.id'), comment='仓库')
-    item_id =Column(db.ForeignKey('seed.id'),  comment='物品ou o')
+    user_id = Column(db.ForeignKey('user.id'), comment='用户')
+    item_id = Column(db.ForeignKey('seed.id'), comment='物品ou o')
+
+
+class UserPlantCoin(BaseModel, Model):
+    __tablename__ = 'user_plant_coin'
+    user_id = Column(db.ForeignKey('user.id'), comment='用户')
+    coin = Column(db.Integer(), comment='金币')

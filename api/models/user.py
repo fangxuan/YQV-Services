@@ -13,6 +13,7 @@ class User(BaseModel, Model):
     email = Column(db.String(50), comment='邮箱')
     avatar = Column(db.String(128), comment='头像')
     birthday = Column(db.Date(), comment='生日')
+    coin = Column(db.Integer, comment='金币')
 
 
 # class Permission(BaseModel, db.Model):

@@ -10,6 +10,7 @@ plant_basic_ser = [
 ]
 
 user_plant_basic_ser = [
+    UserPlant.id,
     UserPlant.plant_id,
     UserPlant.active_flag,
     UserPlant.water,

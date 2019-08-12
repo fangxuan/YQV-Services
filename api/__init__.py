@@ -3,7 +3,7 @@ from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from api.extensions import db
 from api.settings import DevConfig
-from api.views import user, recommend, farm
+from api.views import user, recommend, farm, index
 
 
 def create_app(env_config):
@@ -27,4 +27,5 @@ def create_app(env_config):
     app.register_blueprint(user.blue_print)
     app.register_blueprint(recommend.blue_print)
     app.register_blueprint(farm.blue_print)
+    app.register_blueprint(index.blue_print)
     return app
