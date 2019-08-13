@@ -183,8 +183,12 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
+<<<<<<< HEAD
+    <option name="x" value="-1699" />
+=======
     <option name="x" value="-2560" />
     <option name="y" value="23" />
+>>>>>>> master
     <option name="width" value="1680" />
     <option name="height" value="1050" />
   </component>

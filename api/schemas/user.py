@@ -1,4 +1,4 @@
-from voluptuous import Schema, Required, In, All, Length, Email
+from voluptuous import Schema, Required, In, All, Optional, Length, Email, Url, Date
 
 login_schema = Schema({
     Required('phone'): All(str, ),
@@ -19,6 +19,12 @@ sms_schema = Schema({
 
 
 user_info_schema = Schema({
-    Required('id'): int
+    Optional('id'): int,
+    Optional('avatar'): Url(),
+    Optional('name'): str,
+    Optional('phone'): str,
+    Optional('birthday'): Date(),
+    Optional('gender'): str,
+    Optional('email'): Email(),
 })
 

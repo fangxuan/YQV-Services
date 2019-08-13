@@ -13,6 +13,8 @@ MYSQL_DATABASE = 'YQV_APP'
 REDIS_HOST = '127.0.0.1'
 REDIS_POST = '6379'
 
+origin = '*'  # CROS全部允许
+
 
 class Config(object):
     SECRET_KEY = os_env.get('API_SECRET', 'sf347fr7g8dfhjg9q34j09*4598-q3+q902kdsvmz#cklbvmna90235q0349jrga')

@@ -1,10 +1,10 @@
 from sqlalchemy import Column
 
 from api import db
-from api.models.base import BaseModel
+from api.models.base import BaseModel, Model
 
 
-class User(BaseModel, db.Model):
+class User(BaseModel, Model):
     __tablename__ = 'user'
     name = Column(db.String(50), comment='用户名')
     password = Column(db.String(128), comment='密码')
@@ -13,6 +13,7 @@ class User(BaseModel, db.Model):
     email = Column(db.String(50), comment='邮箱')
     avatar = Column(db.String(128), comment='头像')
     birthday = Column(db.Date(), comment='生日')
+    coin = Column(db.Integer, comment='积分')
 
 
 # class Permission(BaseModel, db.Model):
