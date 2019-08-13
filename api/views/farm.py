@@ -1,9 +1,10 @@
 from flask import Blueprint, request
 
 from api import db
-from api.models.farm import Plant, UserPlant
+from api.extensions import login_user_data
+from api.models.farm import Plant, UserPlant, Seed, UserPlantCoin
 from api.schemas.base import paginate_schema
-from api.schemas.farm import buy_plant_schema
+from api.schemas.farm import buy_schema
 from api.serializer.farm import plant_basic_ser, user_plant_basic_ser
 from api.views.base import common_response, SysStatus
 
@@ -40,7 +41,7 @@ def query_all_plants():
 
 
 @blue_print.route('/user', methods=['GET'])
-# @login_required(user_id)
+# @login_user_data
 def query_user_plants():
     """
        @api {GET} /api/v0/plants/user 获取用户植物信息
@@ -78,34 +79,134 @@ def query_user_plants():
     return common_response(SysStatus.SUCCESS, data, None)
 
 
-@blue_print.route('/buy_plant', methods=['POST'])
-# @login_required(user_id)
-def buy_plant():
+@blue_print.route('/buy', methods=['POST'])
+@login_user_data
+def buy_plant(user):
     """
-       @api {GET} /api/v0/plants/buy_plant 获取用户植物信息
-       @apiName buy_plant
+       @api {GET} /api/v0/plants/buy 购买物品
+       @apiName buy
        @apiGroup farm
-       @apiParam {number} plant_id 植物id
+       @apiParam {number} item_id 物品id
+       @apiParam {string} type 物品类型（FERTILIZER, PESTICIDE, SEED）
        @apiParam {number} quantity 数量
        @apiSuccess {number} sys_status 状态码
        @apiSuccess {string} message  返回的信息
        @apiSuccessExample Success-Response:
-      {"sys_status": "SUCCESS", "data": {"pages": 1, "items": [{"plant_id": 1, "active_flag": true, "water": 80, "fertilizer": 54, "pesticide": 0, "price": "1.02", "harvest_at": "2019-05-31", "status": {"HEALTHY": "健康"}, "image": "http://image.antns.com/uploads/20171220/12/1513742641-BghOtrbPHu.jpg", "created_at": "2019-05-14 10:27:51", "name": "白菜", "category": "蔬菜"}, {"plant_id": 2, "active_flag": true, "water": 50, "fertilizer": 4, "pesticide": 0, "price": "2.00", "harvest_at": "2019-06-14", "status": {"HEALTHY": "健康"}, "image": null, "created_at": "2019-05-14 15:50:44", "name": "萝卜", "category": "蔬菜"}]}, "message": "成功"}
+      {"sys_status": "SUCCESS", "data": null, "message": "成功"}
        @apiErrorExample Error-Response:
         {"data": null,"message": "失败","sys_status": 1}
 
     """
     params = request.args
-    params = buy_plant_schema(params)
-    plant_id = params.get('plant_id')
+    params = buy_schema(params)
+    item_id = params.get('item_id')
+    type = params.get('type')
     quantity = params.get('quantity')
 
-    plant_exist = db.session.query(Plant.query.filter(Plant.id == plant_id).exists()).scalar()
-    if not plant_exist:
-        return common_response(SysStatus.FAIL, None, "植物不存在")
-    total_price = Plant.query.filter(Plant.id == plant_id).with_entities(Plant.needs)
+    if type == 'SEED':
+        item = Seed
+    elif type == 'FERTILIZER':
+        item = Seed  # TODO:肥料
+    elif type == 'PESTICIDE':
+        item = Seed  # TODO:药物
+    else:
+        item = Seed
+    exist = db.session.query(item.query.filter(item.id == item_id).exists()).scalar()
+    if not exist:
+        return common_response(SysStatus.FAIL, None, "物品不存在")
+    total_price = item.query.filter(item.id == item_id).with_entities(item.price).first()
 
-    user_coin = UserPlant
-    if total_price.price * quantity < 1000:
+    user_coin = UserPlantCoin.query.filter(UserPlantCoin.user_id == user.id).first()
+    if total_price.price * quantity > user_coin:
         return common_response(SysStatus.FAIL, None, "金币不足")
+
+    return common_response(SysStatus.SUCCESS, None, "购买成功")
+
+
+@blue_print.route('/feed', methods=['POST'])
+@login_user_data
+def feed_plant(user):
+    """
+       @api {GET} /api/v0/plants/feed 浇水/施肥/播种
+       @apiName buy
+       @apiGroup farm
+       @apiParam {number} item_id 物品id
+       @apiParam {number} plant_id 植物id
+       @apiParam {string} type 物品类型（FERTILIZER, PESTICIDE, SEED）
+       @apiParam {number} quantity 数量
+       @apiSuccess {number} sys_status 状态码
+       @apiSuccess {string} message  返回的信息
+       @apiSuccessExample Success-Response:
+      {"sys_status": "SUCCESS", "data": null, "message": "成功"}
+       @apiErrorExample Error-Response:
+        {"data": null,"message": "失败","sys_status": 1}
+
+    """
+    params = request.args
+    params = buy_schema(params)
+    item_id = params.get('item_id')
+    type = params.get('type')
+    quantity = params.get('quantity')
+
+    if type == 'SEED':
+        item = Seed
+    elif type == 'FERTILIZER':
+        item = Seed  # TODO:肥料
+    elif type == 'PESTICIDE':
+        item = Seed  # TODO:药物
+    else:
+        item = Seed
+    exist = db.session.query(item.query.filter(item.id == item_id).exists()).scalar()
+    if not exist:
+        return common_response(SysStatus.FAIL, None, "物品不存在")
+    total_price = item.query.filter(item.id == item_id).with_entities(item.price).first()
+
+    user_coin = UserPlantCoin.query.filter(UserPlantCoin.user_id == user.id).first()
+    if total_price.price * quantity > user_coin:
+        return common_response(SysStatus.FAIL, None, "金币不足")
+
+    return common_response(SysStatus.SUCCESS, None, "购买成功")
+
+
+@blue_print.route('/use_land', methods=['POST'])
+@login_user_data
+def feed_plant(user):
+    """
+       @api {GET} /api/v0/plants/use_land 使用种子
+       @apiName use_land
+       @apiGroup farm
+       @apiParam {number} seed_id 植物id
+       @apiParam {string} 物品类型（FERTILIZER, PESTICIDE, SEED）
+       @apiParam {number} quantity 数量
+       @apiSuccess {number} sys_status 状态码
+       @apiSuccess {string} message  返回的信息
+       @apiSuccessExample Success-Response:
+      {"sys_status": "SUCCESS", "data": null, "message": "成功"}
+       @apiErrorExample Error-Response:
+        {"data": null,"message": "失败","sys_status": 1}
+
+    """
+    params = request.args
+    params = buy_schema(params)
+    item_id = params.get('item_id')
+    type = params.get('type')
+    quantity = params.get('quantity')
+
+    if type == 'SEED':
+        item = Seed
+    elif type == 'FERTILIZER':
+        item = Seed  # TODO:肥料
+    elif type == 'PESTICIDE':
+        item = Seed  # TODO:药物
+    else:
+        item = Seed
+    exist = db.session.query(item.query.filter(item.id == item_id).exists()).scalar()
+    if not exist:
+        return common_response(SysStatus.FAIL, None, "物品不存在")
+    total_price = item.query.filter(item.id == item_id).with_entities(item.price).first()
+
+    user_coin = UserPlantCoin.query.filter(UserPlantCoin.user_id == user.id).first()
+    if total_price.price * quantity > user_coin:
+        return common_response(SysStatus.FAIL, None, "金币不足")
+
     return common_response(SysStatus.SUCCESS, None, "购买成功")

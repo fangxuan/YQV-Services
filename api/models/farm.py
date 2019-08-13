@@ -16,6 +16,13 @@ class PlantStatus(Enum):
     RESET = "重新播种中"
 
 
+@unique
+class ItemType(Enum):
+    SEED = "种子"
+    FERTILIZER = "肥料"
+    PESTICIDE = "药物"
+
+
 class Plant(BaseModel, Model):
     __tablename__ = 'plant'
     name = Column(db.String(40), comment='名称')
@@ -52,11 +59,29 @@ class Seed(BaseModel, Model):
 
 class Storage(BaseModel, Model):
     __tablename__ = 'storage'
-    user_id = Column(db.ForeignKey('user.id'), comment='用户')
+    user_id = Column(db.ForeignKey('user.id'), comment='用户id')
+    item_type = Column(db.Enum(ItemType), comment='物品类型')
     item_id = Column(db.ForeignKey('seed.id'), comment='物品ou o')
+    quantity = Column(db.Integer(5), comment='数量')
 
 
 class UserPlantCoin(BaseModel, Model):
     __tablename__ = 'user_plant_coin'
     user_id = Column(db.ForeignKey('user.id'), comment='用户')
     coin = Column(db.Integer(), comment='金币')
+
+
+class Fertilizer(BaseModel, Model):
+    __tablename__ = 'fertilizer'
+    name = Column(db.String(40), comment='名称')
+    category = Column(db.String(40), comment='分类')
+    price = Column(db.Numeric(4, 2), comment='单位价格')
+    unit = Column(db.String(4), comment='单位')
+
+
+class Pesticide(BaseModel, Model):
+    __tablename__ = 'pesticide'
+    name = Column(db.String(40), comment='名称')
+    category = Column(db.String(40), comment='分类')
+    price = Column(db.Numeric(4, 2), comment='单位价格')
+    unit = Column(db.String(4), comment='单位')
