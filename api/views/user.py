@@ -51,7 +51,7 @@ def user_reg():
         db.session.add(user)
         db.session.commit()
         redis_store.delete('{}-sms'.format(phone))
-        return common_response(SysStatus.FAIL, None, '注册成功')
+        return common_response(SysStatus.FAIL, None, '注册成功')  # TODO:去除返回的验证码
 
 
 @blue_print.route('/reset_password', methods=['POST'])
@@ -89,7 +89,7 @@ def sms():
 
     redis_store.set('{}-sms'.format(phone), sms_code, 60 * 5)
     print(sms_code)
-    return common_response(SysStatus.SUCCESS, None, '发送成功')
+    return common_response(SysStatus.SUCCESS, {'code': sms_code}, '发送成功')
 
 
 @blue_print.route('/info', methods=['GET'])
@@ -121,4 +121,4 @@ def user_info_put(user):
 @blue_print.route('/my_farm', methods=['GET'])
 @login_user_data
 def my_farm(user):
-    return render_data(user, username='509', body='this id a webpage body')
+    return render_data(username='509', body='this id a webpage body')

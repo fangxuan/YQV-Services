@@ -62,7 +62,7 @@ class Storage(BaseModel, Model):
     user_id = Column(db.ForeignKey('user.id'), comment='用户id')
     item_type = Column(db.Enum(ItemType), comment='物品类型')
     item_id = Column(db.ForeignKey('seed.id'), comment='物品ou o')
-    quantity = Column(db.Integer(5), comment='数量')
+    quantity = Column(db.Integer(), comment='数量')
 
 
 class UserPlantCoin(BaseModel, Model):

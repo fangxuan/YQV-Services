@@ -170,9 +170,9 @@ def feed_plant(user):
 
 @blue_print.route('/use_land', methods=['POST'])
 @login_user_data
-def feed_plant(user):
+def use_land(user):
     """
-       @api {GET} /api/v0/plants/use_land 使用种子
+       @api {GET} /api/v0/plants/use_land  播种/施肥/打药/浇水
        @apiName use_land
        @apiGroup farm
        @apiParam {number} seed_id 植物id
