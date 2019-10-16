@@ -121,4 +121,5 @@ def user_info_put(user):
 @blue_print.route('/my_farm', methods=['GET'])
 @login_user_data
 def my_farm(user):
-    return render_data(username='509', body='this id a webpage body')
+
+    return render_data(username=a, body='this id a webpage body')

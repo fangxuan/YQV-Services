@@ -14,6 +14,7 @@ class User(BaseModel, Model):
     avatar = Column(db.String(128), comment='头像')
     birthday = Column(db.Date(), comment='生日')
     coin = Column(db.Integer, comment='积分')
+    money = Column(db.Numeric, comment='XIN')
 
 
 # class Permission(BaseModel, db.Model):

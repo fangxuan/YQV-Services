@@ -14,7 +14,7 @@ def get_qrcode(strs, logo, name):
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_Q,
-        box_size=10,
+        box_size=16,
         border=2,
     )
     # 添加数据
@@ -70,4 +70,4 @@ def simple_qr(str, name):
 
 
 if __name__ == '__main__':
-    get_qrcode("https://apps.apple.com/us/app/v%E5%AE%9D%E7%9B%88/id1450585629", "./logo.png", './apple.png')
+    get_qrcode("https://m.viinet.com/activity/unlogin", "./logo.png", './at_qrimage.png')
